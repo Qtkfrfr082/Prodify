@@ -11,7 +11,7 @@ CORS(app)
 
 # Initialize Firebase
 
-cred = credentials.Certificate("flask-project-75852-firebase-adminsdk-fbsvc-079ae48544.json")
+cred = credentials.Certificate("key/flask-project-75852-firebase-adminsdk-fbsvc-079ae48544.json")
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
