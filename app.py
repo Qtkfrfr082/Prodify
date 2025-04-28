@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 
 # Initialize Flask app
-app = Flask(__name__, static_folder='.')
+app = Flask(__name__, static_folder='static')
 CORS(app)
 
 # Initialize Firebase
@@ -29,21 +29,56 @@ def add_item():
     name = data.get('name')
     price = data.get('price')
     stock = data.get('stock')
-    if name and price is not None and stock is not None:
-        # Add product
-        doc_ref = db.collection(collection_name).add({'name': name, 'price': price, 'stock': stock})
-        
-        # Add to history without storing the reference
+    brand = data.get('brand')
+    processor = data.get('processor')
+    ram = data.get('ram')
+    storage = data.get('storage')
+    gpu = data.get('gpu')
+    os = data.get('os')
+    condition = data.get('condition')
+    warranty = data.get('warranty')
+
+    # Validate required fields
+    if name and price and stock and brand and processor and ram and storage and gpu and os and condition and warranty:
+        # Add product to Firestore
+        doc_ref = db.collection(collection_name).add({
+            'name': name,
+            'price': price,
+            'stock': stock,
+            'brand': brand,
+            'processor': processor,
+            'ram': ram,
+            'storage': storage,
+            'gpu': gpu,
+            'os': os,
+            'condition': condition,
+            'warranty': warranty
+        })
+
+        # Add to history
         db.collection(history_collection).add({
             'action': 'Product Added',
-            'details': f"Added new product: {name}",
-            'productData': {'name': name, 'price': price, 'stock': stock, 'id': doc_ref[1].id},
+            'details': f"Added new product: {brand}",
+            'productData': {
+                'id': doc_ref[1].id,
+                'name': name,
+                'price': price,
+                'stock': stock,
+                'brand': brand,
+                'processor': processor,
+                'ram': ram,
+                'storage': storage,
+                'gpu': gpu,
+                'os': os,
+                'condition': condition,
+                'warranty': warranty
+            },
             'timestamp': firestore.SERVER_TIMESTAMP
         })
-        
-        return jsonify({'message': 'Product added', 'id': doc_ref[1].id}), 201
-    return jsonify({'error': 'Missing product details'}), 400
 
+        return jsonify({'message': 'Product added', 'id': doc_ref[1].id}), 201
+
+    return jsonify({'error': 'Missing product details'}), 400
 # Read all products
 @app.route('/api/view/items', methods=['GET'])
 def get_items():
