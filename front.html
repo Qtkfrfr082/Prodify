@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product Management</title>
+  <style>
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    * {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+        darkMode: 'class'
+    } </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex ">
+  <!-- Splash Screen -->
+  <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900">
+    <div class="text-center">
+      <div class="mb-8">
+        <svg class="w-24 h-24 mx-auto text-blue-500 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      </div>
+      <h1 class="text-4xl font-bold text-white mb-4">Product Management</h1>
+      <div class="w-48 h-2 mx-auto bg-gray-800 rounded-full overflow-hidden">
+        <div id="progressBar" class="h-full w-0 bg-blue-500 transition-all duration-1000"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Check system dark mode preference
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+
+    // Listen for system dark mode changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (e.matches) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+    const splashScreen = document.getElementById('splashScreen');
+    const progressBar = document.getElementById('progressBar');
+    const mainContent = document.querySelector('.flex-1');
+
+    // Hide main content initially
+    mainContent.style.opacity = '0';
+
+    // Animate progress bar
+    gsap.to(progressBar, {
+      width: '100%',
+      duration: 2,
+      ease: 'power2.inOut'
+    });
+
+    // Hide splash screen and show main content
+    setTimeout(() => {
+      gsap.to(splashScreen, {
+        opacity: 0,
+        duration: 0.5,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          splashScreen.style.display = 'none';
+          
+          // Animate main content
+          gsap.to(mainContent, {
+            opacity: 1,
+            duration: 0.5,
+            ease: 'power2.out'
+          });
+
+          // Animate sidebar items
+          gsap.from('nav li', {
+            x: -50,
+            opacity: 0,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: 'power2.out'
+          });
+
+          // Animate summary cards
+          gsap.from('.summary-card', {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: 'power2.out'
+          });
+        }
+      });
+    }, 2500);
+  });
+</script>
+  <!-- Sidebar -->
+  <div class="bg-gray-600 dark:bg-gray-700 text-white w-64 min-h-screen flex flex-col shadow-lg">
+    <div class="p-4 border-b border-gray-700">
+      <h2 class="text-xl font-bold">Admin Dashboard</h2>
+    </div>
+    <nav class="flex-1 p-4">
+      <ul class="space-y-2">
+        <li>
+          <a href="#" class="flex items-center p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            Products
+          </a>
+        </li>
+        <li>
+          <a href="#" data-section="analytics" class="flex items-center p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Analytics
+          </a>
+        </li>
+        <li>
+            <a href="#" data-section="history" class="flex items-center p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                History
+            </a>
+        </li>
+        
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col">
+    <!-- Top Navigation -->
+    <header class="bg-white dark:bg-gray-800 shadow-sm">
+      <div class="flex items-center justify-between p-4">
+        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Product Management</h1>
+        <div class="flex items-center space-x-4">
+          <!-- Update the notification button and add dropdown -->
+          <div class="relative">
+            <button id="notifButton" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition relative">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+            </button>
+            
+            <!-- Notification Dropdown -->
+            <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Notifications</h3>
+                        <button id="clearNotifs" class="text-sm text-blue-500 hover:text-blue-600 dark:hover:text-blue-400">Clear all</button>
+                    </div>
+                </div>
+                <div id="notifList" class="max-h-80 overflow-y-auto">
+                    <!-- Notifications will be inserted here -->
+                </div>
+            </div>
+          </div>
+          <button class="flex items-center space-x-2">
+            <img src="https://ui-avatars.com/api/?name=Admin+User" alt="Admin" class="w-8 h-8 rounded-full">
+            <span class="text-gray-700 dark:text-white">Admin</span>
+          </button>
+        </div>
+      </div>
+    
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="flex-1 p-6 bg-gray-50 dark:bg-gray-900 overflow-auto">
+      <section id="productSection" class="product-section">
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="summary-card bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-gray-500 text-sm">Total Products</h3>
+              <p class="text-2xl dark:text-gray-200 font-semibold" id="totalProductsCard">0</p>
+            </div>
+            <div class="bg-blue-100 p-3 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="summary-card bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-gray-500 text-sm">Total Value</h3>
+              <p class="text-2xl dark:text-gray-200 font-semibold" id="totalValueCard">₱0.00</p>
+            </div>
+            <div class="bg-green-100 p-3 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="summary-card bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-gray-500 text-sm">Low Stock Items</h3>
+              <p class="text-2xl dark:text-gray-200 font-semibold" id="lowStockCard">0</p>
+            </div>
+            <div class="bg-red-100 p-3 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    <!-- Add Product Form -->
+    <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6">
+      <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-200">Add New Product</h3>
+      <div class="flex flex-wrap gap-4">
+        <input id="productName" type="text" placeholder="Product Name" class="flex-grow px-4 py-2 border rounded dark:bg-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <input id="productPrice" type="number" placeholder="Price" class="w-40 px-4 py-2 border rounded dark:bg-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <input id="productStock" type="number" placeholder="Stock" class="w-40 px-4 py-2 border rounded dark:bg-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button onclick="addProduct()" class="bg-blue-500 text-white px-6 py-2 rounded  hover:bg-blue-600 transition">Add Product</button>
+      </div>
+    </div>
+    <div class="mb-6">
+      <div class="relative">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search products..." 
+          class="w-full px-4 py-2 pl-10 pr-4 border rounded-lg dark:bg-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+    <!-- Total Products -->
+    <div class="text-right mb-4">
+      <span id="totalProducts" class="text-lg font-semibold text-gray-700 dark:text-gray-200">Total Products: 0</span>
+    </div>
+
+    <!-- Product Table -->
+    <div class="overflow-x-auto">
+      <table class="table-auto w-full border-collapse border border-gray-200 dark:border-gray-700 rounded-lg">
+        <thead class="bg-gray-100 dark:bg-gray-800">
+          <tr>
+            <th class="border px-4 py-2 text-left text-gray-600  dark:text-gray-200">Name</th>
+            <th class="border px-4 py-2 text-left text-gray-600 dark:text-gray-200">Price</th>
+            <th class="border px-4 py-2 text-left text-gray-600 dark:text-gray-200">Stock</th>
+            <th class="border px-4 py-2 text-left text-gray-600 dark:text-gray-200">Total Value</th>
+            <th class="border px-4 py-2 text-center text-gray-600 dark:text-gray-200">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productTable" class="bg-white dark:bg-gray-800 dark:text-gray-200 ">
+          <!-- Products will be rendered here -->
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-4 flex items-center justify-between">
+      <div class="text-sm text-gray-700 dark:text-gray-300">
+          Showing <span id="itemsShowing">0-0</span> of <span id="totalItems">0</span> items
+      </div>
+      <div class="flex space-x-2">
+          <button id="prevPage" class="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+              Previous
+          </button>
+          <button id="nextPage" class="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+              Next
+          </button>
+      </div>
+  </div>
+</section>
+
+<section id="analyticsSection" class="hidden">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Stock Distribution Chart -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-200">Stock Distribution</h3>
+            <canvas id="stockChart"></canvas>
+        </div>
+        
+        <!-- Value Distribution Chart -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-200">Value Distribution</h3>
+            <canvas id="valueChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Product Statistics -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+        <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-200">Product Statistics</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <h4 class="text-sm text-gray-500 dark:text-gray-200">Average Stock Level</h4>
+                <p id="avgStock" class="text-2xl font-semibold dark:text-gray-200">0</p>
+            </div>
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <h4 class="text-sm text-gray-500 dark:text-gray-200">Average Product Value</h4>
+                <p id="avgValue" class="text-2xl font-semibold dark:text-gray-200">₱0.00</p>
+            </div>
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <h4 class="text-sm text-gray-500 dark:text-gray-200">Stock Alert Level</h4>
+                <p id="stockAlert" class="text-2xl font-semibold text-red-500">0</p>
+            </div>
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <h4 class="text-sm text-gray-500 dark:text-gray-200">Total Inventory Value</h4>
+                <p id="laptopValue" class="text-2xl font-semibold dark:text-gray-200">₱0.00</p>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section id="historySection" class="hidden w-full">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm min-h-screen">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200">Activity History</h3>
+            <div class="flex gap-2">
+                <button onclick="refreshHistory()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="space-y-4" id="historyList">
+            <!-- History items will be inserted here -->
+        </div>
+    </div>
+</div>
+</section>
+</main>
+  <script>
+    let products = [];
+    let editIndex = -1;
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    // Format price to Peso with thousands, millions, etc.
+    function formatPrice(price) {
+      return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(price);
+    }
+
+    // Fetch products from the backend
+    async function fetchProducts() {
+    try {
+        const response = await fetch('/api/view/items');
+        if (response.ok) {
+            const newProducts = await response.json();
+            
+            // Check for low stock items before updating products array
+            const lowStockProducts = newProducts.filter(p => p.stock < 10);
+            
+            // Show notifications for low stock items
+            if (lowStockProducts.length > 0) {
+                lowStockProducts.forEach(product => {
+                    window.addNotification(
+                        `Low stock alert: ${product.name} (${product.stock} remaining)`,
+                        'warning'
+                    );
+                });
+                
+                // Update notification badge
+                const badge = document.getElementById('notifBadge');
+                badge.textContent = lowStockProducts.length;
+                badge.classList.remove('hidden');
+            }
+
+            // Update products array and render
+            products = newProducts;
+            renderProducts();
+            updateAnalytics();
+        } else {
+            console.error('Failed to fetch products');
+        }
+    } catch (error) {
+        console.error('Error fetching products:', error);
+    }
+}
+// Fetch products on page load
+    let filteredProducts = [];
+
+// Add this new function
+function filterProducts(searchTerm) {
+    currentPage = 1; // Reset to first page when filtering
+    searchTerm = searchTerm.toLowerCase();
+    filteredProducts = products.filter(product => 
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.price.toString().includes(searchTerm) ||
+        product.stock.toString().includes(searchTerm)
+    );
+    renderProducts(true);
+}
+
+function formatNotificationTime(date) {
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    return date.toLocaleDateString();
+}
+async function fetchHistory() {
+    try {
+        const response = await fetch('/api/history');
+        if (!response.ok) {
+            throw new Error('Failed to fetch history');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching history:', error);
+        return [];
+    }
+}
+
+function getHistoryIcon(action) {
+    const icons = {
+        'Product Added': `<svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>`,
+        'Product Updated': `<svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>`,
+        'Product Deleted': `<svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>`
+    };
+    return icons[action] || icons['Product Updated'];
+}
+// Update the renderHistory function
+function renderHistory() {
+    const historyList = document.getElementById('historyList');
+    if (!historyList) return;
+
+    historyList.innerHTML = '<div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>';
+
+    fetchHistory().then(history => {
+        if (!history.length) {
+            historyList.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">No activity history</p>';
+            return;
+        }
+
+        historyList.innerHTML = '';
+        history.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-3';
+            
+            const timestamp = new Date(item.timestamp);
+            div.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                            ${getHistoryIcon(item.action)}
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">${item.action}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${item.details}</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">${formatNotificationTime(timestamp)}</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        ${formatHistoryDetails(item.productData)}
+                    </div>
+                </div>
+            `;
+            
+            historyList.appendChild(div);
+            
+            gsap.from(div, {
+                opacity: 0,
+                y: 20,
+                duration: 0.3,
+                delay: index * 0.1,
+                ease: "power2.out"
+            });
+        });
+    }).catch(error => {
+        historyList.innerHTML = '<p class="text-red-500 dark:text-red-400 text-center py-4">Error loading history</p>';
+        console.error('Error:', error);
+    });
+}
+
+// Add helper function for formatting history details
+function formatHistoryDetails(data) {
+    if (!data) return '';
+    
+    const details = [];
+    if (data.name) details.push(`Name: ${data.name}`);
+    if (data.price) details.push(`Price: ${formatPrice(data.price)}`);
+    if (data.stock) details.push(`Stock: ${data.stock}`);
+    
+    return details.join(' • ');
+}
+
+
+
+// Update or add the refresh function
+function refreshHistory() {
+    const historyList = document.getElementById('historyList');
+    if (!historyList) return;
+    
+    historyList.innerHTML = '<div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>';
+    setTimeout(() => {
+        renderHistory();
+    }, 300);
+}
+
+// Update the navigation event listener to include history
+
+// Maintain scroll position when rendering
+function maintainScrollPosition(callback) {
+    const scrollPosition = window.scrollY;
+    callback();
+    window.scrollTo(0, scrollPosition);
+}
+
+// Render products in the table
+function renderProducts(isFiltering = false) {
+    maintainScrollPosition(() => {
+        const table = document.getElementById("productTable");
+        const totalProducts = document.getElementById("totalProducts");
+        table.innerHTML = "";
+        
+        const displayProducts = isFiltering ? filteredProducts : products;
+        const totalItems = displayProducts.length;
+        
+        // Calculate pagination
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+        const paginatedProducts = displayProducts.slice(startIndex, endIndex);
+        
+        let grandTotal = 0;
+        
+        // Update pagination info
+        document.getElementById('itemsShowing').textContent = `${startIndex + 1}-${endIndex}`;
+        document.getElementById('totalItems').textContent = totalItems;
+        
+        // Update pagination buttons
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = endIndex >= totalItems;
+
+        paginatedProducts.forEach((product, index) => {
+    const totalValue = product.price * product.stock;
+    grandTotal += totalValue;
+    const row = document.createElement("tr");
+    
+    // Add conditional class for low stock
+    const isLowStock = product.stock < 10;
+    row.className = `transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200 ${
+        isLowStock ? 'bg-red-50 dark:bg-red-900/20' : ''
+    }`;
+
+    if (editIndex === index) {
+        row.innerHTML = `
+        <td class="border px-4 py-2">
+            <input id="editName" type="text" value="${product.name}" class="w-full px-2 py-1 border rounded focus:outline-none dark:bg-gray-800 dark:text-gray-200">
+        </td>
+        <td class="border px-4 py-2">
+            <input id="editPrice" type="number" value="${product.price}" class="w-full px-2 py-1 border rounded focus:outline-none dark:bg-gray-800 dark:text-gray-200">
+        </td>
+        <td class="border px-4 py-2">
+            <input id="editStock" type="number" value="${product.stock}" class="w-full px-2 py-1 border rounded focus:outline-none dark:bg-gray-800 dark:text-gray-200">
+        </td>
+        <td class="border px-4 py-2 dark:bg-gray-800 dark:text-gray-200">${formatPrice(totalValue)}</td>
+        <td class="border px-4 py-2 text-center ">
+           <div class="flex justify-center items-center gap-2">
+        <button onclick="saveEdit('${product.id}', ${index})" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition text-sm">Save</button>
+        <button onclick="cancelEdit()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition text-sm">Cancel</button>
+    </div>
+        </td>
+        `;
+    } else {
+        row.innerHTML = `
+        <td class="border px-4 py-2">${product.name}</td>
+        <td class="border px-4 py-2">${formatPrice(product.price)}</td>
+        <td class="border px-4 py-2 ${isLowStock ? 'text-red-600 dark:text-red-400 font-semibold' : ''}">${product.stock}</td>
+        <td class="border px-4 py-2">${formatPrice(totalValue)}</td>
+        <td class="border px-4 py-2 text-center ">
+            <div class="flex justify-center items-center gap-2">
+            <button onclick="editProduct(${index})" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">Edit</button>
+            <button onclick="deleteProduct('${product.id}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Delete</button>
+            </div>
+        </td>
+        `;
+    }
+
+        table.appendChild(row);
+            gsap.from(row, {
+                opacity: 0,
+                y: 20,
+                duration: 0.3,
+                delay: index * 0.05
+            });
+        });
+        document.getElementById('totalProductsCard').textContent = displayProducts.length;
+        document.getElementById('totalValueCard').textContent = formatPrice(grandTotal);
+        const lowStockCount = displayProducts.filter(product => product.stock < 10).length;
+        document.getElementById('lowStockCard').textContent = lowStockCount;
+
+        // Update total products count with filtered length
+        totalProducts.textContent = `Total Products: ${displayProducts.length}`;
+
+        // Add grand total row
+        const grandTotalRow = document.createElement("tr");
+        grandTotalRow.className = "bg-gray-100 font-bold dark:bg-gray-800";
+        grandTotalRow.innerHTML = `
+            <td colspan="3" class="border px-4 py-2 text-right dark:text-gray-200">Grand Total:</td>
+            <td class="border px-4 py-2 dark:text-gray-200">${formatPrice(grandTotal)}</td>
+            <td class="border px-4 py-2"></td>
+        `;
+        table.appendChild(grandTotalRow);
+        gsap.from(grandTotalRow, {
+            opacity: 0,
+            y: 20,
+            duration: 0.5,
+            delay: products.length * 0.1,
+            ease: "elastic.out(1, 0.5)"
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    
+    searchInput.addEventListener('input', (e) => {
+        maintainScrollPosition(() => {
+            filterProducts(e.target.value);
+            const rows = document.querySelectorAll('#productTable tr');
+            gsap.fromTo(rows, 
+                { opacity: 0, y: 20 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 0.2,
+                    stagger: 0.05,
+                    ease: "power2.out"
+                }
+            );
+        });
+    });
+
+    // Clear search with Escape key
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            filterProducts('');
+            
+            const rows = document.querySelectorAll('#productTable tr');
+            gsap.fromTo(rows, 
+                { opacity: 0, y: 20 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 0.2,
+                    stagger: 0.05,
+                    ease: "power2.out"
+                }
+            );
+        }
+    });
+
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+            maintainScrollPosition(() => {
+                currentPage--;
+                renderProducts(searchInput.value.trim() !== '');
+            });
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => {
+        const displayProducts = searchInput.value.trim() !== '' ? filteredProducts : products;
+        const totalPages = Math.ceil(displayProducts.length / itemsPerPage);
+        
+        if (currentPage < totalPages) {
+            maintainScrollPosition(() => {
+                currentPage++;
+                renderProducts(searchInput.value.trim() !== '');
+            });
+        }
+    });
+});
+
+    // Add a new product
+    async function addProduct() {
+    const nameInput = document.getElementById("productName");
+    const priceInput = document.getElementById("productPrice");
+    const stockInput = document.getElementById("productStock");
+
+    const name = nameInput.value.trim();
+    const price = parseFloat(priceInput.value);
+    const stock = parseInt(stockInput.value);
+
+    if (name && !isNaN(price) && !isNaN(stock)) {
+        const inputs = [nameInput, priceInput, stockInput];
+        
+        try {
+            const response = await fetch('/api/add/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price, stock })
+            });
+
+            if (response.ok) {
+                // Clear inputs first
+                nameInput.value = "";
+                priceInput.value = "";
+                stockInput.value = "";
+
+                // Simple feedback animation
+                gsap.from(inputs, {
+                    scale: 0.95,
+                    duration: 0.2,
+                    ease: "back.out(1.2)",
+                    clearProps: "all" // This ensures all properties are reset
+                });
+
+                currentPage = Math.ceil(products.length / itemsPerPage); // Go to last page
+                await fetchProducts();
+                window.addNotification(
+                    `Product "${name}" has been added successfully!`,
+                    'success'
+                );
+                Swal.fire('Success', 'Product added successfully!', 'success');
+            } else {
+                Swal.fire('Error', 'Failed to add product', 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'An error occurred while adding the product', 'error');
+        }
+    } else {
+        Swal.fire('Warning', 'Please fill out all fields correctly', 'warning');
+    }
+}
+
+    // Delete a product
+    async function deleteProduct(id) {
+      const row = event.target.closest('tr');
+      Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      gsap.to(row, {
+                opacity: 0,
+                x: 100,
+                duration: 0.5,
+                ease: "power2.in",
+                onComplete: async () => {
+                    try {
+                        const response = await fetch(`/api/delete/items/${id}`, { method: 'DELETE' });
+                        if (response.ok) {
+                            await fetchProducts();
+                            
+                            Swal.fire('Deleted!', 'The product has been deleted.', 'success');
+                        }
+                    } catch (error) {
+                        Swal.fire('Error', 'An error occurred while deleting the product', 'error');
+                    }
+                }
+            });
+    }
+    });
+}
+
+    // Edit a product
+    function editProduct(index) {
+      editIndex = index;
+      renderProducts();
+      Swal.fire('Edit Mode', 'You can now edit the product details.', 'info');
+    }
+
+    // Save an edited product
+    async function saveEdit(id, index) {
+      const nameInput = document.getElementById("editName");
+      const priceInput = document.getElementById("editPrice");
+      const stockInput = document.getElementById("editStock");
+
+      const name = nameInput.value.trim();
+      const price = parseFloat(priceInput.value);
+      const stock = parseInt(stockInput.value);
+
+      if (name && !isNaN(price) && !isNaN(stock)) {
+        try {
+          maintainScrollPosition(async () => {
+            const response = await fetch(`/api/update/items/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, price, stock })
+            });
+            if (response.ok) {
+              editIndex = -1;
+              fetchProducts();
+              Swal.fire('Success', 'Product updated successfully!', 'success');
+            }
+          });
+        } catch (error) {
+          Swal.fire('Error', 'An error occurred while updating the product', 'error');
+        }
+      } else {
+        Swal.fire('Warning', 'Please fill out all fields correctly', 'warning');
+      }
+    }
+
+    // Cancel editing
+    function cancelEdit() {
+      editIndex = -1;
+      renderProducts();
+    }
+
+    // Fetch products on page load
+    fetchProducts();
+    let stockChart = null;
+    let valueChart = null;
+
+    function initializeCharts() {
+        // Stock Distribution Chart
+        const stockCtx = document.getElementById('stockChart').getContext('2d');
+        stockChart = new Chart(stockCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Stock Level',
+                    data: [],
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Value Distribution Chart
+        const valueCtx = document.getElementById('valueChart').getContext('2d');
+        valueChart = new Chart(valueCtx, {
+            type: 'pie',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.5)',
+                        'rgba(16, 185, 129, 0.5)',
+                        'rgba(239, 68, 68, 0.5)',
+                        'rgba(245, 158, 11, 0.5)',
+                        'rgba(139, 92, 246, 0.5)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    }
+
+    function updateAnalytics() {
+    if (!stockChart || !valueChart) {
+        initializeCharts();
+    }
+
+    // Calculate statistics
+    const totalProducts = products.length;
+    const avgStockLevel = products.reduce((acc, p) => acc + p.stock, 0) / totalProducts;
+    const avgProductValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0) / totalProducts;
+    const lowStockCount = products.filter(p => p.stock < 10).length;
+
+    // Sort products by stock and value
+    const stockSorted = [...products].sort((a, b) => b.stock - a.stock).slice(0, 10);
+    const valueSorted = [...products].sort((a, b) => (b.price * b.stock) - (a.price * a.stock)).slice(0, 10);
+
+    // Calculate total value
+    const totalValue = products.reduce((total, product) => {
+        return total + (product.price * product.stock);
+    }, 0);
+
+    // Update statistics display
+    document.getElementById('avgStock').textContent = avgStockLevel.toFixed(0);
+    document.getElementById('avgValue').textContent = formatPrice(avgProductValue);
+    document.getElementById('stockAlert').textContent = lowStockCount;
+    document.getElementById('laptopValue').textContent = formatPrice(totalValue);
+
+    // Update Stock Distribution Chart
+    stockChart.data.labels = stockSorted.map(p => {
+        return p.name.length > 15 ? p.name.substring(0, 15) + '...' : p.name;
+    });
+    stockChart.data.datasets[0].data = stockSorted.map(p => p.stock);
+    stockChart.options = {
+    responsive: true,
+    plugins: {
+        title: {
+            display: true,
+            text: 'Top 10 Products by Stock Level',
+            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937',
+            font: {
+                size: 16
+            }
+        },
+        legend: {
+            display: false
+        },
+        tooltip: {
+            titleColor: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937',
+            bodyColor: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937',
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : 'white',
+            callbacks: {
+                title: (context) => {
+                    const index = context[0].dataIndex;
+                    return stockSorted[index].name;
+                },
+                label: (context) => {
+                    return `Stock: ${context.raw}`;
+                }
+            }
+        }
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            title: {
+                display: true,
+                text: 'Stock Level',
+                color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937'
+            },
+            ticks: {
+                color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937'
+            },
+            grid: {
+                color: document.documentElement.classList.contains('dark') ? 'rgba(229, 231, 235, 0.1)' : 'rgba(31, 41, 55, 0.1)'
+            }
+        },
+        x: {
+            ticks: {
+                maxRotation: 45,
+                minRotation: 45,
+                color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937'
+            },
+            grid: {
+                color: document.documentElement.classList.contains('dark') ? 'rgba(229, 231, 235, 0.1)' : 'rgba(31, 41, 55, 0.1)'
+            }
+        }
+    }
+};
+
+// Update the theme change listener to include stock chart colors
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    const isDark = document.documentElement.classList.contains('dark');
+    const textColor = isDark ? '#e5e7eb' : '#1f2937';
+    const gridColor = isDark ? 'rgba(229, 231, 235, 0.1)' : 'rgba(31, 41, 55, 0.1)';
+    const bgColor = isDark ? '#374151' : 'white';
+
+    // Update value chart colors
+    valueChart.options.plugins.title.color = textColor;
+    valueChart.options.plugins.legend.labels.color = textColor;
+    valueChart.options.plugins.tooltip.titleColor = textColor;
+    valueChart.options.plugins.tooltip.bodyColor = textColor;
+    valueChart.options.plugins.tooltip.backgroundColor = bgColor;
+    valueChart.update();
+
+    // Update stock chart colors
+    stockChart.options.plugins.title.color = textColor;
+    stockChart.options.plugins.tooltip.titleColor = textColor;
+    stockChart.options.plugins.tooltip.bodyColor = textColor;
+    stockChart.options.plugins.tooltip.backgroundColor = bgColor;
+    stockChart.options.scales.y.ticks.color = textColor;
+    stockChart.options.scales.x.ticks.color = textColor;
+    stockChart.options.scales.y.grid.color = gridColor;
+    stockChart.options.scales.x.grid.color = gridColor;
+    stockChart.options.scales.y.title.color = textColor;
+    stockChart.update();
+});
+
+    // Update Value Distribution Chart
+    valueChart.data.labels = valueSorted.map(p => p.name);
+valueChart.data.datasets[0] = {
+    data: valueSorted.map(p => p.price * p.stock),
+    backgroundColor: [
+        'rgba(59, 130, 246, 0.5)',
+        'rgba(16, 185, 129, 0.5)',
+        'rgba(239, 68, 68, 0.5)',
+        'rgba(245, 158, 11, 0.5)',
+        'rgba(139, 92, 246, 0.5)',
+        'rgba(236, 72, 153, 0.5)',
+        'rgba(217, 119, 6, 0.5)',
+        'rgba(124, 58, 237, 0.5)',
+        'rgba(55, 65, 81, 0.5)',
+        'rgba(220, 38, 38, 0.5)'
+    ],
+    hoverOffset: 4
+};
+
+valueChart.options = {
+    responsive: true,
+    plugins: {
+        title: {
+            display: true,
+            text: 'Top 10 Products by Total Value',
+            font: { size: 16 },
+            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937'
+        },
+        legend: {
+            position: 'right',
+            labels: {
+                boxWidth: 15,
+                usePointStyle: true,
+                pointStyle: 'circle',
+                font: { size: 11 },
+                padding: 20,
+                color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937',
+                generateLabels: function(chart) {
+                    const datasets = chart.data.datasets;
+                    const labels = chart.data.labels;
+                    const textColor = document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937';
+                    
+                    // Calculate total for percentages
+                    const total = datasets[0].data.reduce((sum, value) => sum + value, 0);
+                    
+                    return labels.map((label, i) => {
+                        const meta = chart.getDatasetMeta(0);
+                        const isHidden = meta.data[i].hidden;
+                        const value = datasets[0].data[i];
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        // Truncate label if longer than 15 characters to accommodate percentage
+                        const truncatedLabel = label.length > 15 ? label.substring(0, 15) + '...' : label;
+                        
+                        return {
+                            text: `${truncatedLabel} (${percentage}%)`,
+                            fillStyle: datasets[0].backgroundColor[i],
+                            strokeStyle: datasets[0].backgroundColor[i],
+                            lineWidth: isHidden ? 1 : 0,
+                            lineDash: isHidden ? [4, 2] : [],
+                            hidden: isHidden,
+                            index: i,
+                            fontColor: textColor,
+                            color: textColor
+                        };
+                    });
+                }
+            },
+            onClick: function(e, legendItem, legend) {
+                const index = legendItem.index;
+                const meta = legend.chart.getDatasetMeta(0);
+                meta.data[index].hidden = !meta.data[index].hidden;
+                legend.chart.update();
+            }
+        },
+        tooltip: {
+            titleColor: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937',
+            bodyColor: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#1f2937',
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : 'white',
+            bodyFont: { size: 12 },
+            padding: 12,
+            callbacks: {
+                label: (context) => {
+                    const value = context.raw;
+                    const label = valueSorted[context.dataIndex].name;
+                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    return ` ${label}: ${formatPrice(value)} (${percentage}%)`;
+                }
+            }
+        }
+    }
+};
+
+valueChart.update();
+    }
+
+    // Add navigation functionality
+    document.querySelectorAll('nav a').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = e.currentTarget.getAttribute('data-section');
+        
+        // Hide all sections first
+        document.getElementById('productSection').classList.add('hidden');
+        document.getElementById('analyticsSection').classList.add('hidden');
+        document.getElementById('historySection').classList.add('hidden');
+        
+        // Show selected section
+        if (section === 'analytics') {
+            document.getElementById('analyticsSection').classList.remove('hidden');
+            updateAnalytics();
+        } else if (section === 'history') {
+            document.getElementById('historySection').classList.remove('hidden');
+            renderHistory();
+        } else {
+            document.getElementById('productSection').classList.remove('hidden');
+        }
+        
+        // Update active state
+        document.querySelectorAll('nav a').forEach(a => a.classList.remove('bg-gray-700'));
+        e.currentTarget.classList.add('bg-gray-700');
+    });
+});
+
+    // Animation Utilities
+const fadeIn = (element, delay = 0) => {
+    gsap.from(element, {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        delay,
+        ease: "power2.out"
+    });
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const notifButton = document.getElementById('notifButton');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const notifBadge = document.getElementById('notifBadge');
+    const notifList = document.getElementById('notifList');
+    const clearNotifs = document.getElementById('clearNotifs');
+    
+    let notifications = [];
+    let existingAlerts = new Set(); // Track existing alerts
+
+    // Toggle dropdown
+    notifButton.addEventListener('click', () => {
+        notifDropdown.classList.toggle('hidden');
+        if (!notifDropdown.classList.contains('hidden')) {
+            notifBadge.classList.add('hidden');
+            renderNotifications();
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!notifButton.contains(e.target) && !notifDropdown.contains(e.target)) {
+            notifDropdown.classList.add('hidden');
+        }
+    });
+
+    // Clear all notifications
+    clearNotifs.addEventListener('click', () => {
+        notifications = [];
+        existingAlerts.clear(); // Clear tracked alerts
+        renderNotifications();
+        notifBadge.classList.add('hidden');
+    });
+
+    // Add notification
+    function addNotification(message, type = 'info') {
+        // Check if this exact message already exists
+        const alertKey = `${message}-${type}`;
+        if (existingAlerts.has(alertKey)) {
+            return; // Skip if alert already exists
+        }
+
+        existingAlerts.add(alertKey);
+        notifications.unshift({
+            message,
+            type,
+            time: new Date()
+        });
+        notifBadge.textContent = notifications.length;
+        notifBadge.classList.remove('hidden');
+        renderNotifications();
+    }
+
+    // Make addNotification available globally
+    window.addNotification = addNotification;
+
+    // Remove notification
+    window.removeNotification = (index) => {
+        const removedNotif = notifications[index];
+        const alertKey = `${removedNotif.message}-${removedNotif.type}`;
+        existingAlerts.delete(alertKey); // Remove from tracked alerts
+        notifications.splice(index, 1);
+        notifBadge.textContent = notifications.length;
+        if (notifications.length === 0) notifBadge.classList.add('hidden');
+        renderNotifications();
+    };
+
+    // Render notifications
+    function renderNotifications() {
+        notifList.innerHTML = notifications.length ? '' : 
+            '<div class="p-4 text-gray-500 dark:text-gray-400 text-center">No notifications</div>';
+        
+        notifications.forEach((notif, index) => {
+            const div = document.createElement('div');
+            div.className = `p-4 border-b border-gray-200 dark:border-gray-700 ${
+                index === 0 ? 'animate-fadeIn' : ''
+            }`;
+            div.innerHTML = `
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        ${getNotificationIcon(notif.type)}
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm text-gray-800 dark:text-gray-200">${notif.message}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            ${formatNotificationTime(notif.time)}
+                        </p>
+                    </div>
+                    <button onclick="removeNotification(${index})" class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+            notifList.appendChild(div);
+        });
+    }
+
+    // Helper functions
+    function getNotificationIcon(type) {
+        const icons = {
+            warning: '<svg class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>',
+            success: '<svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+            error: '<svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+            info: '<svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+        };
+        return icons[type] || icons.info;
+    }
+
+    function formatNotificationTime(date) {
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+        
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+        return date.toLocaleDateString();
+    }
+
+    // Make addNotification available globally
+    window.addNotification = addNotification;
+    window.removeNotification = (index) => {
+        notifications.splice(index, 1);
+        notifBadge.textContent = notifications.length;
+        if (notifications.length === 0) notifBadge.classList.add('hidden');
+        renderNotifications();
+    };
+
+    // Update fetchProducts to add notifications for low stock
+    const originalFetchProducts = window.fetchProducts;
+    window.fetchProducts = async function() {
+        try {
+            const response = await fetch('/api/view/items');
+            if (response.ok) {
+                const newProducts = await response.json();
+                
+                // Check for low stock items
+                const lowStockProducts = newProducts.filter(p => p.stock < 10);
+                
+                // Show notifications for low stock items
+                if (lowStockProducts.length > 0) {
+                    lowStockProducts.forEach(product => {
+                        addNotification(
+                            `Low stock alert: ${product.name} (${product.stock} remaining)`,
+                            'warning'
+                        );
+                    });
+                }
+
+                // Update products array and render
+                products = newProducts;
+                renderProducts();
+                updateAnalytics();
+            }
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        }
+    };
+});
+  </script>
+</body>
+</html>
