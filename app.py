@@ -89,24 +89,77 @@ def get_items():
 # Update product
 @app.route('/api/update/items/<id>', methods=['PUT'])
 def update_item(id):
+    product = db.collection(collection_name).document(id).get()
+    if not product.exists:
+        return jsonify({'error': 'Product not found'}), 404
+
+    # Get the existing product data
+    product_data = product.to_dict()
     data = request.json
-    name = data.get('name')
-    price = data.get('price')
-    stock = data.get('stock')
-    if name and price is not None and stock is not None:
-        # Update product
-        db.collection(collection_name).document(id).update({'name': name, 'price': price, 'stock': stock})
-        
-        # Add to history
+
+    # Store the existing data for history purposes
+    existing_data = product_data.copy()
+
+    # Extract updated fields by comparing incoming data with existing data
+    updated_fields = {}
+    for key in ['name', 'price', 'stock']:
+        if key in data and data[key] != product_data.get(key):
+            updated_fields[key] = data[key]
+
+    if updated_fields:
+        # Update product with only the changed fields
+        db.collection(collection_name).document(id).update(updated_fields)
+
+        # Add to history with both the existing and updated fields
         db.collection(history_collection).add({
             'action': 'Product Updated',
-            'details': f"Updated product: {name}",
-            'productData': {'id': id, 'name': name, 'price': price, 'stock': stock},
+            'details': f"Updated product: {existing_data['name']}",
+            'productData': {
+                'id': id,
+                'name': existing_data['name'],
+                'existingFields': existing_data,  # Store the original data
+                'updatedFields': updated_fields  # Log only the updated fields
+            },
             'timestamp': firestore.SERVER_TIMESTAMP
         })
-        
-        return jsonify({'message': 'Product updated'})
-    return jsonify({'error': 'Missing product details'}), 400
+
+        return jsonify({'message': 'Product updated', 'updatedFields': updated_fields})
+    
+    # If no changes detected, return the existing product data
+    return jsonify({'message': 'No changes detected', 'product': product_data}), 200
+
+@app.route('/api/update/info/items/<id>', methods=['PUT'])
+def update_item_details(id):
+    product = db.collection(collection_name).document(id).get()
+    if not product.exists:
+        return jsonify({'error': 'Product not found'}), 404
+
+    product_data = product.to_dict()
+    data = request.json
+
+    # Extract updated fields
+    updated_fields = {}
+    for key in ['brand', 'processor', 'ram', 'storage', 'gpu', 'os', 'condition', 'warranty']:
+        if key in data and data[key] != product_data.get(key):
+            updated_fields[key] = data[key]
+
+    if updated_fields:
+        # Update product with only the changed fields
+        db.collection(collection_name).document(id).update(updated_fields)
+
+        # Add to history
+        db.collection(history_collection).add({
+            'action': 'Product info Updated',
+            'details': f"Updated product info: {product_data['name']}",
+            'productData': {'id': id, 'name': product_data['name'], 'updatedFields': updated_fields},
+            'timestamp': firestore.SERVER_TIMESTAMP
+        })
+
+        return jsonify({'message': 'Product updated', 'updatedFields': updated_fields})
+    
+    # If no changes detected, return the existing product data
+    return jsonify({'message': 'No changes detected', 'product': product_data}), 200
+
 
 # Delete product
 @app.route('/api/delete/items/<id>', methods=['DELETE'])
@@ -145,7 +198,16 @@ def get_history():
             # Convert timestamp to ISO format for JSON serialization
             if data.get('timestamp'):
                 data['timestamp'] = data['timestamp'].isoformat()
-            history.append({'id': doc.id, **data})
+            
+            # Include updatedFields if they exist
+            history_item = {
+                'id': doc.id,
+                'action': data.get('action'),
+                'details': data.get('details'),
+                'timestamp': data.get('timestamp'),
+                'updatedFields': data.get('productData', {}).get('updatedFields', {})  # Extract updatedFields
+            }
+            history.append(history_item)
             
         return jsonify(history)
     except Exception as e:

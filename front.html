@@ -420,7 +420,7 @@
 
 <section id="historySection" class="hidden w-full">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm min-h-screen">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-6 ">
             <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200">Activity History</h3>
             <div class="flex gap-2">
                 <button onclick="refreshHistory()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
@@ -430,7 +430,7 @@
                 </button>
             </div>
         </div>
-        <div class="space-y-4" id="historyList">
+        <div class="space-y-4 max-h-[90vh] overflow-y-auto" id="historyList">
             <!-- History items will be inserted here -->
         </div>
     </div>
@@ -564,6 +564,7 @@ function renderHistory() {
                         <div>
                             <p class="text-sm font-medium text-gray-800 dark:text-gray-200">${item.action}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">${item.details}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400"> ${Object.entries(item.updatedFields).map(([key, value]) => `${key}: ${value}`).join(', ')}</p>
                             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">${formatNotificationTime(timestamp)}</p>
                         </div>
                     </div>
@@ -675,6 +676,7 @@ function renderProducts(isFiltering = false) {
         <td class="border px-4 py-2">
             <input id="editStock" type="number" value="${product.stock}" class="w-full px-2 py-1 border rounded focus:outline-none dark:bg-gray-800 dark:text-gray-200">
         </td>
+        
         <td class="border px-4 py-2 dark:bg-gray-800 dark:text-gray-200">${formatPrice(totalValue)}</td>
          <td class="border px-4 py-2 text-center ">
             <button onclick="editshowDetails('${product.id}')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Info</button>
@@ -781,42 +783,75 @@ function editshowDetails(productId) {
     return;
   }
 
-  // Populate modal fields
+  // Reference the modal element
   const modal = document.getElementById('detailsModal');
-  const modalName = document.getElementById('modalName');
-  const modalPrice = document.getElementById('modalPrice');
-  const modalStock = document.getElementById('modalStock');
-  const editButton = document.getElementById('editButton');
-  const saveButton = document.getElementById('saveButton');
 
-  modalName.value = product.name;
-  modalPrice.value = product.price;
-  modalStock.value = product.stock;
+  // Populate modal fields
+  const modalStock = document.getElementById('modalStock');
+  const modalBrand = document.getElementById('modalBrand');
+  const modalProcessor = document.getElementById('modalProcessor');
+  const modalRam = document.getElementById('modalRam');
+  const modalStorage = document.getElementById('modalStorage');
+  const modalGpu = document.getElementById('modalGpu');
+  const modalOs = document.getElementById('modalOs');
+  const modalCondition = document.getElementById('modalCondition');
+  const modalWarranty = document.getElementById('modalWarranty');
+
+  modalBrand.value = product.brand;
+  modalProcessor.value = product.processor;
+  modalRam.value = product.ram;
+  modalStorage.value = product.storage;
+  modalGpu.value = product.gpu;
+  modalOs.value = product.os;
+  modalCondition.value = product.condition;
+  modalWarranty.value = product.warranty;
 
   // Show modal
   modal.classList.remove('hidden');
 
   // Enable editing
+  const editButton = document.getElementById('editButton');
+  const saveButton = document.getElementById('saveButton');
   editButton.onclick = () => {
-    modalName.disabled = false;
-    modalPrice.disabled = false;
-    modalStock.disabled = false;
+    modalBrand.disabled = false;
+    modalProcessor.disabled = false;
+    modalRam.disabled = false;
+    modalStorage.disabled = false;
+    modalGpu.disabled = false;
+    modalOs.disabled = false;
+    modalCondition.disabled = false;
+    modalWarranty.disabled = false;
     editButton.classList.add('hidden');
     saveButton.classList.remove('hidden');
   };
 
   // Save changes
   saveButton.onclick = async () => {
-    const updatedName = modalName.value.trim();
-    const updatedPrice = parseFloat(modalPrice.value);
-    const updatedStock = parseInt(modalStock.value);
+    const updatedBrand = modalBrand.value.trim();
+    const updatedProcessor = modalProcessor.value.trim();
+    const updatedRam = modalRam.value.trim();
+    const updatedStorage = modalStorage.value.trim();
+    const updatedGpu = modalGpu.value.trim();
+    const updatedOs = modalOs.value.trim();
+    const updatedCondition = modalCondition.value.trim();
+    const updatedWarranty = modalWarranty.value.trim();
 
-    if (updatedName && !isNaN(updatedPrice) && !isNaN(updatedStock)) {
+    if (updatedBrand && updatedProcessor && updatedRam && updatedStorage && updatedGpu && updatedOs && updatedCondition && updatedWarranty) {
       try {
-        const response = await fetch(`/api/update/items/${productId}`, {
+        const response = await fetch(`/api/update/info/items/${productId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: updatedName, price: updatedPrice, stock: updatedStock })
+          body: JSON.stringify({
+            name: product.name,
+            brand: updatedBrand,
+            processor: updatedProcessor,
+            ram: updatedRam,
+            storage: updatedStorage,
+            gpu: updatedGpu,
+            os: updatedOs,
+            condition: updatedCondition,
+            warranty: updatedWarranty,
+          }),
         });
 
         if (response.ok) {
@@ -837,9 +872,14 @@ function editshowDetails(productId) {
   // Close modal
   document.getElementById('cancelButton').onclick = () => {
     modal.classList.add('hidden');
-    modalName.disabled = true;
-    modalPrice.disabled = true;
-    modalStock.disabled = true;
+    modalBrand.disabled = true;
+    modalProcessor.disabled = true;
+    modalRam.disabled = true;
+    modalStorage.disabled = true;
+    modalGpu.disabled = true;
+    modalOs.disabled = true;
+    modalCondition.disabled = true;
+    modalWarranty.disabled = true;
     editButton.classList.remove('hidden');
     saveButton.classList.add('hidden');
   };
@@ -1137,8 +1177,18 @@ async function addProductFromModal() {
     }
 
     // Calculate statistics
-    const totalProducts = products.length;
-    const avgStockLevel = products.reduce((acc, p) => acc + p.stock, 0) / totalProducts;
+    const totalStock = products.reduce((acc, p) => {
+    const stockValue = Number(p.stock); // Convert stock value to a number // Log each product's stock
+    return acc + stockValue;
+}, 0);
+
+const totalProducts = products.length; // Get the total number of products
+
+const avgStockLevel = totalProducts > 0 
+    ? parseFloat((totalStock / totalProducts).toFixed(2)) 
+    : 0;
+
+
     const avgProductValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0) / totalProducts;
     const lowStockCount = products.filter(p => p.stock < 10).length;
 
@@ -1557,20 +1607,40 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
 
   <div id="detailsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-96 p-6">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-96 p-6 max-h-[90vh] overflow-y-auto">
     <h2 id="modalTitle" class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Product Details</h2>
     <div id="modalContent" class="space-y-4">
+     
       <div>
-        <label for="modalName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-        <input id="modalName" type="text" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400" disabled>
+        <label for="modalBrand" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Brand</label>
+        <input id="modalBrand" type="text" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
       </div>
       <div>
-        <label for="modalPrice" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
-        <input id="modalPrice" type="number" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400" disabled>
+        <label for="modalProcessor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Processor</label>
+        <input id="modalProcessor" type="text" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
       </div>
       <div>
-        <label for="modalStock" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Stock</label>
-        <input id="modalStock" type="number" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400" disabled>
+        <label for="modalRam" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ram</label>
+        <input id="modalRam" type="text" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+      </div>
+      <div>
+        <label for="modalStorage" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Storage</label>
+        <input id="modalStorage" type="text" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400" >
+      </div>
+      <div>
+        <label for="modalGpu" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gpu</label>
+        <input id="modalGpu" type="text" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400" >
+      </div>
+      <div>
+        <label for="modalOs" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Os</label>
+        <input id="modalOs" type="text" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400" >
+      </div><div>
+        <label for="modalCondition" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Condition</label>
+        <input id="modalCondition" type="text" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400" >
+      </div>
+      <div>
+        <label for="modalWarranty" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Warranty</label>
+        <input id="modalWarranty" type="text" class="w-full px-4 py-2 border rounded dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400" >
       </div>
     </div>
     <div class="mt-6 flex justify-end space-x-4">
