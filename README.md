@@ -100,14 +100,18 @@ Monitor low-stock items
 Here’s how the repo is organized:
 
 ```bash
-Copy code
 Prodify/
-├── backend/             # Python backend services, API endpoints, business logic
-├── frontend/            # Admin UI, dashboard, static assets
-├── docker              # Dockerfiles, docker-compose configs
-├── README.md
-└── other supporting files
+├── key/                # Firebase service account credentials
+├── static/             # Static files (CSS, JS, assets)
+├── app.py              # Flask application entry point
+├── front.html          # Main frontend page
+├── dockerfile          # Docker build file
+├── requirements.txt    # Python dependencies
+├── README.md           # Project documentation
+└── .gitattributes      # Git configuration
 ```
+
+
 ## 🛣 Roadmap
 Authentication & user roles (e.g., admin vs viewer)
 
