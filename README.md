@@ -14,7 +14,7 @@
 - [Project Structure](#-project-structure)  
 - [Roadmap](#-roadmap)  
 - [Contributing](#-contributing)  
-- [License](#-license)  
+
 
 ---
 
