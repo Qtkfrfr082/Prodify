@@ -104,10 +104,7 @@ Copy code
 Prodify/
 ├── backend/             # Python backend services, API endpoints, business logic
 ├── frontend/            # Admin UI, dashboard, static assets
-├── docker/              # Dockerfiles, docker-compose configs
-├── config/              # Config files (.env templates, Firebase setup)
-├── docs/                # Documentation, setup guides
-├── tests/               # Test suites (if any)
+├── docker              # Dockerfiles, docker-compose configs
 ├── README.md
 └── other supporting files
 ```
